@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
                 }
                 return {
                     allowedContentTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+                    addRandomSuffix: true,
                     tokenPayload: JSON.stringify({ pathname }), // optional
                 };
             },
