@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef } from 'react';
+import { upload } from '@vercel/blob/client';
 import Modal from './Modal';
 import { Client, Reservation } from '@/lib/types';
 import { saveClient, updateClient } from '@/lib/store';
@@ -88,13 +89,13 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
 
             // Upload file via Vercel Blob if provided
             if (file) {
-                const formData = new FormData();
-                formData.append('file', file);
-                const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                const data = await res.json();
-                attachmentURL = data.url;
+                const newBlob = await upload(file.name, file, {
+                    access: 'public',
+                    handleUploadUrl: '/api/upload',
+                });
+                attachmentURL = newBlob.url;
                 attachmentName = file.name;
-                attachmentPathname = data.pathname;
+                attachmentPathname = newBlob.pathname;
                 hasAttachment = true;
             }
 

@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { isLoggedIn } from '@/lib/auth';
 import { subscribeToClients } from '@/lib/store';
 import { Client } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
@@ -16,10 +18,13 @@ export default function ClientsPage() {
     const [detailClient, setDetailClient] = useState<Client | null>(null);
     const { toast, showToast } = useToast();
 
+    const router = useRouter();
+
     useEffect(() => {
+        if (!isLoggedIn()) { router.replace('/'); return; }
         const unsub = subscribeToClients(setClients);
         return unsub;
-    }, []);
+    }, [router]);
 
     const countries = [...new Set(clients.map(c => c.country).filter(Boolean))].sort();
 
@@ -28,13 +33,8 @@ export default function ClientsPage() {
         return m && (!filterCountry || c.country === filterCountry);
     });
 
-    // Keep detail in sync when clients list updates
-    useEffect(() => {
-        if (detailClient) {
-            const updated = clients.find(c => c.id === detailClient.id);
-            setDetailClient(updated ?? null);
-        }
-    }, [clients]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Use the latest data from the clients array for the detail view
+    const currentDetailClient = detailClient ? clients.find(c => c.id === detailClient.id) : null;
 
     return (
         <div style={{ display: 'flex', height: '100vh', position: 'relative', zIndex: 1 }}>
@@ -92,7 +92,7 @@ export default function ClientsPage() {
             <ClientDetail
                 open={!!detailClient}
                 onClose={() => setDetailClient(null)}
-                client={detailClient}
+                client={currentDetailClient || detailClient}
                 clients={clients}
                 onToast={showToast}
             />

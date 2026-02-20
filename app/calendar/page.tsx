@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { isLoggedIn } from '@/lib/auth';
 import { subscribeToClients } from '@/lib/store';
 import { Client } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
@@ -25,10 +27,13 @@ export default function CalendarPage() {
     const [addOpen, setAddOpen] = useState(false);
     const { toast, showToast } = useToast();
 
+    const router = useRouter();
+
     useEffect(() => {
+        if (!isLoggedIn()) { router.replace('/'); return; }
         const unsub = subscribeToClients(setClients);
         return unsub;
-    }, []);
+    }, [router]);
 
     function calPrev() { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); } else setCalMonth(m => m - 1); }
     function calNext() { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); } else setCalMonth(m => m + 1); }
