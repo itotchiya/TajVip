@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Modal from './Modal';
 import { Client } from '@/lib/types';
 import { updateClient } from '@/lib/store';
+import { Calendar as CalIcon, Users, UserPlus, X, Search, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 const DAY_QUOTA = 3;
 
@@ -56,66 +57,94 @@ export default function DayModal({ open, onClose, date, clients, onToast, onAddC
 
     return (
         <Modal open={open} onClose={() => { setSelectedId(null); setSearch(''); onClose(); }}>
-            <div className="day-modal-date">📅 {formatDate(date)}</div>
-            <div className="day-modal-quota" style={isFull ? { color: '#f87171' } : {}}>
-                {isFull ? `COMPLET — ${count}/${DAY_QUOTA}` : `${count}/${DAY_QUOTA} réservations`}
+            <div className="day-header-group">
+                <div className="day-date-row">
+                    <CalIcon size={18} className="icon-gold" />
+                    <span>{formatDate(date)}</span>
+                </div>
+                <div className={`day-quota-pill ${isFull ? 'full' : ''}`}>
+                    {count}/{DAY_QUOTA} réservations
+                </div>
             </div>
 
             {/* Already booked */}
-            {booked.length > 0 && (
-                <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--sub)', textTransform: 'uppercase', marginBottom: 8 }}>Déjà réservés</div>
+            <div className="day-section">
+                <div className="day-section-label">DÉJÀ RÉSERVÉS</div>
+                {booked.length > 0 ? (
                     <div className="day-clients-list">
                         {booked.map(c => {
                             const res = c.reservations.find(r => date >= r.start && date <= r.end);
                             return (
                                 <div key={c.id} className="day-client-item">
-                                    <span>{c.firstName} {c.lastName}</span>
-                                    <span className={`tag tag-${res?.status}`}>{res?.status === 'confirmed' ? '✓' : res?.status === 'pending' ? '⏳' : '✗'}</span>
+                                    <div className="client-info">
+                                        <Users size={14} className="sub-icon" />
+                                        <span>{c.firstName} {c.lastName}</span>
+                                    </div>
+                                    <div className="client-actions">
+                                        {res?.status === 'confirmed' && <CheckCircle size={14} className="tag-icon confirmed" />}
+                                        {res?.status === 'pending' && <Clock size={14} className="tag-icon pending" />}
+                                        {res?.status === 'cancelled' && <XCircle size={14} className="tag-icon cancelled" />}
+                                        <button className="icon-btn danger-hover" title="Supprimer">
+                                            <X size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="empty-mini-state">Aucune réservation</div>
+                )}
+            </div>
 
             {/* Assign new client */}
-            {!isFull && (
-                <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--sub)', textTransform: 'uppercase', marginBottom: 8 }}>Assigner un client</div>
-                    {selectedClient ? (
-                        <div style={{ marginBottom: 10 }}>
-                            <div className="selected-badge">
-                                {selectedClient.firstName} {selectedClient.lastName}
-                                <button onClick={() => setSelectedId(null)}>✕</button>
-                            </div>
+            <div className="day-section">
+                <div className="day-section-label">ASSIGNER UN CLIENT</div>
+                {selectedClient ? (
+                    <div className="selected-client-box">
+                        <div className="client-info">
+                            <Users size={16} className="icon-gold" />
+                            <span>{selectedClient.firstName} {selectedClient.lastName}</span>
                         </div>
-                    ) : (
-                        <>
+                        <button className="clear-selection" onClick={() => setSelectedId(null)}>
+                            <X size={14} />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="assignment-tools">
+                        <div className="search-box-mini">
+                            <Search size={14} className="sub-icon" />
                             <input
-                                className="day-search-input"
                                 placeholder="Rechercher un client..."
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                             />
-                            {search && (
-                                <div className="day-results">
-                                    {available.length === 0
-                                        ? <div className="day-result-item" style={{ color: 'var(--sub)' }}>Aucun client trouvé</div>
-                                        : available.map(c => (
-                                            <div key={c.id} className="day-result-item" onClick={() => { setSelectedId(c.id); setSearch(''); }}>
-                                                {c.firstName} {c.lastName}
-                                            </div>
-                                        ))
-                                    }
-                                </div>
-                            )}
-                            <button className="btn-new-client" onClick={() => { onClose(); onAddClient(); }}>+ Nouveau client</button>
-                        </>
-                    )}
-                    <button className="btn-primary" onClick={handleSave} disabled={!selectedId}>ASSIGNER</button>
-                </div>
-            )}
+                        </div>
+                        
+                        {search && (
+                            <div className="day-results">
+                                {available.length === 0
+                                    ? <div className="day-result-item disabled">Aucun client trouvé</div>
+                                    : available.map(c => (
+                                        <div key={c.id} className="day-result-item" onClick={() => { setSelectedId(c.id); setSearch(''); }}>
+                                            {c.firstName} {c.lastName}
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        )}
+
+                        <button className="btn-secondary-light" onClick={() => { onClose(); onAddClient(); }}>
+                            <UserPlus size={14} />
+                            <span>Nouveau client</span>
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <button className="btn-primary" onClick={handleSave} disabled={!selectedId || isFull}>
+                {isFull ? 'COMPLET' : 'ASSIGNER'}
+            </button>
         </Modal>
     );
 }

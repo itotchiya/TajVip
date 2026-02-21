@@ -3,6 +3,7 @@ import Modal from './Modal';
 import { Client, Reservation } from '@/lib/types';
 import { updateClient, deleteClient } from '@/lib/store';
 import { useState } from 'react';
+import { Phone, FileText, Calendar as CalIcon, ChevronLeft, ChevronRight, Check, Clock, X, Trash2, Sparkles, AlertCircle } from 'lucide-react';
 
 const DAY_QUOTA = 3;
 const MONTHS_FR = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
@@ -97,11 +98,17 @@ export default function ClientDetail({ open, onClose, client, clients, onToast }
 
             <div className="detail-section">
                 <div className="detail-section-title">Coordonnées</div>
-                {client.phone && <div className="detail-row"><span className="detail-row-val">📞 {client.phone}</span></div>}
-                {client.notes && <div className="detail-row"><span className="detail-row-val">📝 {client.notes}</span></div>}
+                {client.phone && <div className="detail-row">
+                    <Phone size={14} className="sub-icon" />
+                    <span className="detail-row-val">{client.phone}</span>
+                </div>}
+                {client.notes && <div className="detail-row">
+                    <FileText size={14} className="sub-icon" />
+                    <span className="detail-row-val">{client.notes}</span>
+                </div>}
                 {client.hasAttachment && (
                     <div className="detail-row">
-                        <span className="detail-row-icon">📄</span>
+                        <FileText size={14} className="icon-gold" />
                         {client.attachmentURL
                             ? <a href={client.attachmentURL} target="_blank" rel="noreferrer" style={{ color: 'var(--gold-light)', fontWeight: 600, textDecoration: 'none' }}>{client.attachmentName || 'Voir le document'}</a>
                             : <span className="detail-row-val">{client.attachmentName}</span>}
@@ -115,10 +122,16 @@ export default function ClientDetail({ open, onClose, client, clients, onToast }
                     ? <div style={{ color: 'var(--sub)', fontSize: 13, padding: '12px', border: '1px dashed var(--border)', borderRadius: '12px', textAlign: 'center' }}>Aucun séjour enregistré</div>
                     : (client.reservations || []).map(r => (
                         <div key={r.id} className="res-item">
-                            <div className="res-item-top">
-                                <span className={`tag tag-${r.status}`}>{r.status === 'confirmed' ? '✓' : r.status === 'cancelled' ? '✕' : '⏳'}</span>
-                                <span className="res-item-dates">Du {r.start} {r.end && r.end !== r.start ? ` au ${r.end}` : ''}</span>
-                                <button className="res-delete-btn" onClick={() => deleteReservation(r.id)} title="Supprimer">✕</button>
+                            <div className="res-item-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    {r.status === 'confirmed' && <Check size={14} className="tag-icon confirmed" />}
+                                    {r.status === 'pending' && <Clock size={14} className="tag-icon pending" />}
+                                    {r.status === 'cancelled' && <X size={14} className="tag-icon cancelled" />}
+                                    <span className="res-item-dates">Du {r.start} {r.end && r.end !== r.start ? ` au ${r.end}` : ''}</span>
+                                </div>
+                                <button className="icon-btn danger-hover" onClick={() => deleteReservation(r.id)} title="Supprimer">
+                                    <X size={14} />
+                                </button>
                             </div>
                             {r.notes && <div className="res-item-notes">{r.notes}</div>}
                         </div>
@@ -129,16 +142,21 @@ export default function ClientDetail({ open, onClose, client, clients, onToast }
                 <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', marginTop: 8 }}>
                     <div className="mini-cal">
                         <div className="mini-cal-nav">
-                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 0) { setMiniMonth(11); setMiniYear(y => y - 1); } else setMiniMonth(m => m - 1); }}>‹</button>
+                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 0) { setMiniMonth(11); setMiniYear(y => y - 1); } else setMiniMonth(m => m - 1); }}>
+                                <ChevronLeft size={14} />
+                            </button>
                             <span className="mini-cal-title">{MONTHS_FR[miniMonth]} {miniYear}</span>
-                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 11) { setMiniMonth(0); setMiniYear(y => y + 1); } else setMiniMonth(m => m + 1); }}>›</button>
+                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 11) { setMiniMonth(0); setMiniYear(y => y + 1); } else setMiniMonth(m => m + 1); }}>
+                                <ChevronRight size={14} />
+                            </button>
                         </div>
                         <div className="mini-grid">
                             {DAYS_FR.map(d => <div key={d} className="mini-day-header">{d}</div>)}
                             {renderMiniCal()}
                         </div>
-                        {pickStart && <div style={{ fontSize: 12, color: 'var(--gold-light)', fontWeight: 600, marginTop: 12, padding: '8px 12px', background: 'var(--gold-dim)', borderRadius: '8px', display: 'inline-block' }}>
-                            📅 Du {pickStart} {pickEnd && pickEnd !== pickStart ? ` au ${pickEnd}` : ''}
+                        {pickStart && <div className="date-selection-badge">
+                            <CalIcon size={14} className="icon-gold" />
+                            <span>Du {pickStart} {pickEnd && pickEnd !== pickStart ? ` au ${pickEnd}` : ''}</span>
                         </div>}
                     </div>
 
@@ -146,6 +164,9 @@ export default function ClientDetail({ open, onClose, client, clients, onToast }
                         <div className="status-tab-row" style={{ marginTop: 16 }}>
                             {(['confirmed', 'pending', 'cancelled'] as const).map(s => (
                                 <button key={s} className={`status-tab${status === s ? ` active-${s}` : ''}`} onClick={() => setStatus(s)}>
+                                    {s === 'confirmed' && <Check size={14} style={{ marginRight: 6 }} />}
+                                    {s === 'pending' && <Clock size={14} style={{ marginRight: 6 }} />}
+                                    {s === 'cancelled' && <X size={14} style={{ marginRight: 6 }} />}
                                     {s === 'confirmed' ? 'Confirmée' : s === 'pending' ? 'Attente' : 'Annulée'}
                                 </button>
                             ))}
@@ -163,8 +184,16 @@ export default function ClientDetail({ open, onClose, client, clients, onToast }
             )}
 
             <div className="detail-actions">
-                {!showRes && <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowRes(true)}>✨ Nouveau Séjour</button>}
-                <button className="btn-danger" onClick={handleDeleteClient}>Supprimer</button>
+                {!showRes && (
+                    <button className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={() => setShowRes(true)}>
+                        <Sparkles size={16} className="icon-gold" />
+                        <span>Nouveau Séjour</span>
+                    </button>
+                )}
+                <button className="btn-danger-outline" style={{ display: 'flex', alignItems: 'center', gap: 8 }} onClick={handleDeleteClient}>
+                    <Trash2 size={16} />
+                    <span>Supprimer</span>
+                </button>
             </div>
         </Modal>
     );

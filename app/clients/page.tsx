@@ -9,6 +9,7 @@ import BottomNav from '@/components/BottomNav';
 import AddClientModal from '@/components/AddClientModal';
 import ClientDetail from '@/components/ClientDetail';
 import Toast, { useToast } from '@/components/Toast';
+import { Search, Users, Plus } from 'lucide-react';
 
 export default function ClientsPage() {
     const [clients, setClients] = useState<Client[]>([]);
@@ -50,9 +51,7 @@ export default function ClientsPage() {
                         </h1>
                     </div>
                     <div className="search-wrap">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                        </svg>
+                        <Search size={16} strokeWidth={2.5} className="sub-icon" />
                         <input placeholder="Chercher un client..." value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                     <select className="filter-select" value={filterCountry} onChange={e => setFilterCountry(e.target.value)}>
@@ -65,7 +64,7 @@ export default function ClientsPage() {
                 <div className="content">
                     {filtered.length === 0 ? (
                         <div className="empty-state">
-                            <div className="icon">👤</div>
+                            <div className="icon"><Users size={48} strokeWidth={1} /></div>
                             <p style={{ fontWeight: 600 }}>{clients.length === 0 ? 'Aucun client enregistré' : 'Recherche infructueuse'}</p>
                             <p style={{ fontSize: 13, opacity: 0.6 }}>{clients.length === 0 ? 'Commencez par ajouter un dossier' : 'Essayez d\'autres mots clés'}</p>
                         </div>
@@ -85,7 +84,9 @@ export default function ClientsPage() {
                 </div>
 
                 {/* FAB */}
-                <button className="fab" onClick={() => setAddOpen(true)} title="Ajouter un client">+</button>
+                <button className="fab" onClick={() => setAddOpen(true)} title="Ajouter un client">
+                    <Plus size={32} strokeWidth={3} />
+                </button>
             </div>
 
             {/* Mobile bottom nav */}

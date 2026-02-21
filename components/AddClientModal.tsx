@@ -4,6 +4,7 @@ import { upload } from '@vercel/blob/client';
 import Modal from './Modal';
 import { Client, Reservation } from '@/lib/types';
 import { saveClient, updateClient } from '@/lib/store';
+import { FileText, CloudUpload, Calendar as CalIcon, ChevronLeft, ChevronRight, Check, Clock, X } from 'lucide-react';
 
 const DAY_QUOTA = 3;
 const MONTHS_FR = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
@@ -175,7 +176,12 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
                     onDragLeave={() => setDragOver(false)}
                     onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) setFile(f); }}
                 >
-                    <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.6 }}>{file || editClient?.attachmentName ? '📄' : '☁️'}</div>
+                    <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'center' }}>
+                        {file || editClient?.attachmentName 
+                            ? <FileText size={32} className="icon-gold" /> 
+                            : <CloudUpload size={32} style={{ opacity: 0.5 }} />
+                        }
+                    </div>
                     <div style={{ fontSize: 13, fontWeight: 600 }}>
                         {file ? file.name : editClient?.attachmentName || 'Choisir un fichier...'}
                     </div>
@@ -190,16 +196,21 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
                     <label>Séjour (Optionnel)</label>
                     <div className="mini-cal">
                         <div className="mini-cal-nav">
-                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 0) { setMiniMonth(11); setMiniYear(y => y - 1); } else setMiniMonth(m => m - 1); }}>‹</button>
+                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 0) { setMiniMonth(11); setMiniYear(y => y - 1); } else setMiniMonth(m => m - 1); }}>
+                                <ChevronLeft size={14} />
+                            </button>
                             <span className="mini-cal-title">{MONTHS_FR[miniMonth]} {miniYear}</span>
-                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 11) { setMiniMonth(0); setMiniYear(y => y + 1); } else setMiniMonth(m => m + 1); }}>›</button>
+                            <button className="mini-nav-btn" onClick={() => { if (miniMonth === 11) { setMiniMonth(0); setMiniYear(y => y + 1); } else setMiniMonth(m => m + 1); }}>
+                                <ChevronRight size={14} />
+                            </button>
                         </div>
                         <div className="mini-grid">
                             {DAYS_FR.map(d => <div key={d} className="mini-day-header">{d}</div>)}
                             {renderMiniCal()}
                         </div>
-                        {pickStart && <div style={{ fontSize: 12, color: 'var(--gold-light)', fontWeight: 600, marginTop: 12, padding: '8px 12px', background: 'var(--gold-dim)', borderRadius: '8px', display: 'inline-block' }}>
-                            📅 Du {pickStart} {pickEnd && pickEnd !== pickStart ? ` au ${pickEnd}` : ''}
+                        {pickStart && <div className="date-selection-badge">
+                            <CalIcon size={14} className="icon-gold" />
+                            <span>Du {pickStart} {pickEnd && pickEnd !== pickStart ? ` au ${pickEnd}` : ''}</span>
                         </div>}
                     </div>
 
@@ -208,7 +219,10 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
                         <div className="status-tab-row">
                             {(['confirmed', 'pending', 'cancelled'] as const).map(s => (
                                 <button key={s} className={`status-tab${status === s ? ` active-${s}` : ''}`} onClick={() => setStatus(s)}>
-                                    {s === 'confirmed' ? '✓ Confirmée' : s === 'pending' ? '⏳ En attente' : '✗ Annulée'}
+                                    {s === 'confirmed' && <Check size={14} style={{ marginRight: 6 }} />}
+                                    {s === 'pending' && <Clock size={14} style={{ marginRight: 6 }} />}
+                                    {s === 'cancelled' && <X size={14} style={{ marginRight: 6 }} />}
+                                    {s === 'confirmed' ? 'Confirmée' : s === 'pending' ? 'En attente' : 'Annulée'}
                                 </button>
                             ))}
                         </div>
