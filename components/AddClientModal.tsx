@@ -137,7 +137,6 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
     }
 
     return (
-    return (
         <Modal open={open} onClose={() => { reset(); onClose(); }} title={editClient ? "Modifier le Client" : "Nouveau Client"}>
             <div className="form-row">
                 <div className="form-group">
