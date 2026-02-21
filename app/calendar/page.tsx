@@ -68,6 +68,11 @@ export default function CalendarPage() {
                 <div key={i} className={`quota-dot${i < count ? ` used${isFull ? ' full-q' : ''}` : ''}`} />
             ));
 
+            const mobileDots = dayClients.map(c => {
+                const res = c.reservations.find(r => ds >= r.start && ds <= r.end);
+                return <div key={c.id} className={`cal-dot ${res?.status || ''}`} />;
+            });
+
             cells.push(
                 <div
                     key={ds}
@@ -76,6 +81,7 @@ export default function CalendarPage() {
                 >
                     <div className="cal-day-num">{d}</div>
                     {chips}
+                    <div className="cal-dots">{mobileDots}</div>
                     <div className={`cal-quota-label${isFull ? ' full-q' : ''}`}>{isFull ? 'COMPLET' : `${count}/${DAY_QUOTA}`}</div>
                     <div className="quota-bar">{dots}</div>
                 </div>

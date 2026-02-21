@@ -137,33 +137,38 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
     }
 
     return (
-        <Modal open={open} onClose={() => { reset(); onClose(); }} title="✦ Nouveau Client">
+    return (
+        <Modal open={open} onClose={() => { reset(); onClose(); }} title={editClient ? "Modifier le Client" : "Nouveau Client"}>
             <div className="form-row">
                 <div className="form-group">
-                    <label>PRÉNOM</label>
-                    <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Sofia" />
+                    <label>Prénom</label>
+                    <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="ex: Sofia" />
                 </div>
                 <div className="form-group">
-                    <label>NOM</label>
-                    <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Laurent" />
+                    <label>Nom</label>
+                    <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="ex: Laurent" />
                 </div>
             </div>
-            <div className="form-group">
-                <label>TÉLÉPHONE</label>
-                <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+33 6 12 34 56 78" />
+
+            <div className="form-row">
+                <div className="form-group">
+                    <label>Téléphone</label>
+                    <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+33 6..." />
+                </div>
+                <div className="form-group">
+                    <label>Pays</label>
+                    <input value={country} onChange={e => setCountry(e.target.value)} placeholder="France" />
+                </div>
             </div>
+
             <div className="form-group">
-                <label>PAYS</label>
-                <input value={country} onChange={e => setCountry(e.target.value)} placeholder="France" />
-            </div>
-            <div className="form-group">
-                <label>NOTES</label>
+                <label>Notes Client</label>
                 <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Informations complémentaires..." style={{ resize: 'none' }} />
             </div>
 
             {/* File upload */}
             <div className="form-group">
-                <label>PIÈCE JOINTE</label>
+                <label>Document / Passeport</label>
                 <div
                     className={`file-drop${dragOver ? ' drag-over' : ''}`}
                     onClick={() => fileRef.current?.click()}
@@ -171,8 +176,11 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
                     onDragLeave={() => setDragOver(false)}
                     onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) setFile(f); }}
                 >
-                    <div style={{ fontSize: 24, marginBottom: 4 }}>📎</div>
-                    {file ? file.name : editClient?.attachmentName || 'Glisser un fichier ici · Cliquer pour choisir'}
+                    <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.6 }}>{file || editClient?.attachmentName ? '📄' : '☁️'}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>
+                        {file ? file.name : editClient?.attachmentName || 'Choisir un fichier...'}
+                    </div>
+                    <div style={{ fontSize: 11, opacity: 0.5, marginTop: 4 }}>PDF, PNG, JPG (Max 10MB)</div>
                 </div>
                 <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={e => e.target.files && setFile(e.target.files[0])} />
             </div>
@@ -180,7 +188,7 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
             {/* Date picker */}
             {!editClient && (
                 <div className="form-group">
-                    <label>DATE DE RÉSERVATION (optionnel)</label>
+                    <label>Séjour (Optionnel)</label>
                     <div className="mini-cal">
                         <div className="mini-cal-nav">
                             <button className="mini-nav-btn" onClick={() => { if (miniMonth === 0) { setMiniMonth(11); setMiniYear(y => y - 1); } else setMiniMonth(m => m - 1); }}>‹</button>
@@ -191,13 +199,13 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
                             {DAYS_FR.map(d => <div key={d} className="mini-day-header">{d}</div>)}
                             {renderMiniCal()}
                         </div>
-                        {pickStart && <div style={{ fontSize: 12, color: 'var(--sub)', marginTop: 8 }}>
-                            📅 {pickStart}{pickEnd && pickEnd !== pickStart ? ` → ${pickEnd}` : ''}
+                        {pickStart && <div style={{ fontSize: 12, color: 'var(--gold-light)', fontWeight: 600, marginTop: 12, padding: '8px 12px', background: 'var(--gold-dim)', borderRadius: '8px', display: 'inline-block' }}>
+                            📅 Du {pickStart} {pickEnd && pickEnd !== pickStart ? ` au ${pickEnd}` : ''}
                         </div>}
                     </div>
 
                     {pickStart && <>
-                        <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--sub)', textTransform: 'uppercase' }}>STATUT</label>
+                        <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.2, color: 'var(--sub)', textTransform: 'uppercase', marginBottom: 8, display: 'block' }}>État de la réservation</label>
                         <div className="status-tab-row">
                             {(['confirmed', 'pending', 'cancelled'] as const).map(s => (
                                 <button key={s} className={`status-tab${status === s ? ` active-${s}` : ''}`} onClick={() => setStatus(s)}>
@@ -205,16 +213,16 @@ export default function AddClientModal({ open, onClose, clients, onToast, editCl
                                 </button>
                             ))}
                         </div>
-                        <div className="form-group" style={{ marginTop: 8 }}>
-                            <label>NOTES RÉSERVATION</label>
-                            <input value={resNotes} onChange={e => setResNotes(e.target.value)} placeholder="Vol, hôtel..." />
+                        <div className="form-group" style={{ marginTop: 12 }}>
+                            <label>Notes Réservation</label>
+                            <input value={resNotes} onChange={e => setResNotes(e.target.value)} placeholder="Détails du séjour..." />
                         </div>
                     </>}
                 </div>
             )}
 
             <button className="btn-primary" onClick={handleSave} disabled={saving}>
-                {saving ? 'ENREGISTREMENT...' : 'ENREGISTRER'}
+                {saving ? 'TRAITEMENT EN COURS...' : editClient ? 'ENREGISTRER LES MODIFICATIONS' : 'CRÉER LE DOSSIER CLIENT'}
             </button>
         </Modal>
     );

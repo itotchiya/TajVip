@@ -91,43 +91,42 @@ export default function ClientDetail({ open, onClose, client, clients, onToast }
                 <div className="detail-avatar">{initials}</div>
                 <div>
                     <div className="detail-name">{client.firstName} {client.lastName}</div>
-                    <div className="detail-sub">{client.country}</div>
+                    <div className="detail-sub">{client.country || 'Pays non renseigné'}</div>
                 </div>
             </div>
 
             <div className="detail-section">
-                <div className="detail-section-title">Informations</div>
-                {client.phone && <div className="detail-row"><span className="detail-row-icon">📞</span><span className="detail-row-val">{client.phone}</span></div>}
-                {client.country && <div className="detail-row"><span className="detail-row-icon">🌍</span><span className="detail-row-val">{client.country}</span></div>}
-                {client.notes && <div className="detail-row"><span className="detail-row-icon">📝</span><span className="detail-row-val">{client.notes}</span></div>}
+                <div className="detail-section-title">Coordonnées</div>
+                {client.phone && <div className="detail-row"><span className="detail-row-val">📞 {client.phone}</span></div>}
+                {client.notes && <div className="detail-row"><span className="detail-row-val">📝 {client.notes}</span></div>}
                 {client.hasAttachment && (
                     <div className="detail-row">
-                        <span className="detail-row-icon">📎</span>
+                        <span className="detail-row-icon">📄</span>
                         {client.attachmentURL
-                            ? <a href={client.attachmentURL} target="_blank" rel="noreferrer" style={{ color: 'var(--gold-light)', textDecoration: 'none' }}>{client.attachmentName || 'Voir fichier'}</a>
+                            ? <a href={client.attachmentURL} target="_blank" rel="noreferrer" style={{ color: 'var(--gold-light)', fontWeight: 600, textDecoration: 'none' }}>{client.attachmentName || 'Voir le document'}</a>
                             : <span className="detail-row-val">{client.attachmentName}</span>}
                     </div>
                 )}
             </div>
 
             <div className="detail-section">
-                <div className="detail-section-title">Réservations</div>
+                <div className="detail-section-title">Historique des Séjours</div>
                 {(client.reservations || []).length === 0
-                    ? <div style={{ color: 'var(--sub)', fontSize: 13 }}>Aucune réservation</div>
+                    ? <div style={{ color: 'var(--sub)', fontSize: 13, padding: '12px', border: '1px dashed var(--border)', borderRadius: '12px', textAlign: 'center' }}>Aucun séjour enregistré</div>
                     : (client.reservations || []).map(r => (
                         <div key={r.id} className="res-item">
                             <div className="res-item-top">
-                                <span className={`tag tag-${r.status}`}>{r.status === 'confirmed' ? '✓ Confirmée' : r.status === 'cancelled' ? '✗ Annulée' : '⏳ En attente'}</span>
-                                <span className="res-item-dates">📅 {r.start}{r.end && r.end !== r.start ? ` → ${r.end}` : ''}</span>
-                                <button className="res-delete-btn" onClick={() => deleteReservation(r.id)}>✕</button>
+                                <span className={`tag tag-${r.status}`}>{r.status === 'confirmed' ? '✓' : r.status === 'cancelled' ? '✕' : '⏳'}</span>
+                                <span className="res-item-dates">Du {r.start} {r.end && r.end !== r.start ? ` au ${r.end}` : ''}</span>
+                                <button className="res-delete-btn" onClick={() => deleteReservation(r.id)} title="Supprimer">✕</button>
                             </div>
                             {r.notes && <div className="res-item-notes">{r.notes}</div>}
                         </div>
                     ))}
             </div>
 
-            {showRes ? (
-                <div style={{ marginTop: 8 }}>
+            {showRes && (
+                <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', marginTop: 8 }}>
                     <div className="mini-cal">
                         <div className="mini-cal-nav">
                             <button className="mini-nav-btn" onClick={() => { if (miniMonth === 0) { setMiniMonth(11); setMiniYear(y => y - 1); } else setMiniMonth(m => m - 1); }}>‹</button>
@@ -138,30 +137,34 @@ export default function ClientDetail({ open, onClose, client, clients, onToast }
                             {DAYS_FR.map(d => <div key={d} className="mini-day-header">{d}</div>)}
                             {renderMiniCal()}
                         </div>
-                        {pickStart && <div style={{ fontSize: 12, color: 'var(--sub)', marginTop: 8 }}>📅 {pickStart}{pickEnd && pickEnd !== pickStart ? ` → ${pickEnd}` : ''}</div>}
+                        {pickStart && <div style={{ fontSize: 12, color: 'var(--gold-light)', fontWeight: 600, marginTop: 12, padding: '8px 12px', background: 'var(--gold-dim)', borderRadius: '8px', display: 'inline-block' }}>
+                            📅 Du {pickStart} {pickEnd && pickEnd !== pickStart ? ` au ${pickEnd}` : ''}
+                        </div>}
                     </div>
+
                     {pickStart && <>
-                        <div className="status-tab-row">
+                        <div className="status-tab-row" style={{ marginTop: 16 }}>
                             {(['confirmed', 'pending', 'cancelled'] as const).map(s => (
                                 <button key={s} className={`status-tab${status === s ? ` active-${s}` : ''}`} onClick={() => setStatus(s)}>
-                                    {s === 'confirmed' ? '✓ Confirmée' : s === 'pending' ? '⏳ En attente' : '✗ Annulée'}
+                                    {s === 'confirmed' ? 'Confirmée' : s === 'pending' ? 'Attente' : 'Annulée'}
                                 </button>
                             ))}
                         </div>
-                        <div className="form-group">
-                            <input value={resNotes} onChange={e => setResNotes(e.target.value)} placeholder="Notes..." style={{ padding: '9px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 13, fontFamily: 'Inter,sans-serif', outline: 'none', width: '100%' }} />
+                        <div className="form-group" style={{ marginTop: 12 }}>
+                            <input value={resNotes} onChange={e => setResNotes(e.target.value)} placeholder="Détails du séjour..." style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface-raised)', color: 'var(--text)', outline: 'none' }} />
                         </div>
                     </>}
-                    <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                        <button className="btn-secondary" onClick={() => setShowRes(false)}>Annuler</button>
-                        <button className="btn-primary" style={{ marginTop: 0 }} onClick={saveReservation}>Ajouter</button>
+
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                        <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowRes(false)}>Annuler</button>
+                        <button className="btn-primary" style={{ flex: 1, marginTop: 0 }} onClick={saveReservation}>Ajouter</button>
                     </div>
                 </div>
-            ) : null}
+            )}
 
             <div className="detail-actions">
-                {!showRes && <button className="btn-secondary" onClick={() => setShowRes(true)}>📅 Ajouter une date</button>}
-                <button className="btn-danger" onClick={handleDeleteClient}>🗑 Supprimer</button>
+                {!showRes && <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowRes(true)}>✨ Nouveau Séjour</button>}
+                <button className="btn-danger" onClick={handleDeleteClient}>Supprimer</button>
             </div>
         </Modal>
     );

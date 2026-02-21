@@ -44,13 +44,16 @@ export default function ClientsPage() {
                 {/* Header */}
                 <div className="header">
                     <div style={{ flex: 1 }}>
-                        <h1>Clients <span className="header-sub">— {clients.length} client{clients.length !== 1 ? 's' : ''}</span></h1>
+                        <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            Clients 
+                            <span style={{ fontSize: '14px', fontWeight: 500, opacity: 0.5, letterSpacing: 0 }}>— {clients.length}</span>
+                        </h1>
                     </div>
                     <div className="search-wrap">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg>
-                        <input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
+                        <input placeholder="Chercher un client..." value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                     <select className="filter-select" value={filterCountry} onChange={e => setFilterCountry(e.target.value)}>
                         <option value="">Tous les pays</option>
@@ -63,13 +66,18 @@ export default function ClientsPage() {
                     {filtered.length === 0 ? (
                         <div className="empty-state">
                             <div className="icon">👤</div>
-                            <p>{clients.length === 0 ? 'Ajoutez votre premier client' : 'Aucun client trouvé'}</p>
+                            <p style={{ fontWeight: 600 }}>{clients.length === 0 ? 'Aucun client enregistré' : 'Recherche infructueuse'}</p>
+                            <p style={{ fontSize: 13, opacity: 0.6 }}>{clients.length === 0 ? 'Commencez par ajouter un dossier' : 'Essayez d\'autres mots clés'}</p>
                         </div>
                     ) : (
                         <div className="clients-grid">
                             {filtered.map(c => (
                                 <div key={c.id} className="glass client-card" onClick={() => setDetailClient(c)}>
+                                    <div className="detail-avatar" style={{ width: 44, height: 44, fontSize: 16, marginBottom: 8, borderRadius: 12 }}>
+                                        {c.firstName[0]}{c.lastName[0]}
+                                    </div>
                                     <div className="card-name">{c.firstName} {c.lastName}</div>
+                                    <div style={{ fontSize: 11, opacity: 0.5 }}>{c.country || 'Inconnu'}</div>
                                 </div>
                             ))}
                         </div>
